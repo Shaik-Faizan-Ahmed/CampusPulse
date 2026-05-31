@@ -1,14 +1,10 @@
-Here's the full README:
-
----
-
 # 🎓 CampusPulse
 
 **A Digital Infrastructure for College-Wide Event Collaboration and Control**
 
 > Mini Project — Bachelor of Technology in Computer Science and Engineering, CVR College of Engineering, 2025–2026
 
-![Landing Page](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/landing%20page.jpg)
+![Landing Page](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/landing%20page.jpg)
 
 ---
 
@@ -19,8 +15,6 @@ Here's the full README:
 | Shaik Faizan Ahmed | 23B81A05L3 |
 | AVS Mohan Kumar | 23B81A05M6 |
 | K Prem Sagar Reddy | 23B81A05N5 |
-
-**Guide:** Mr. Damerla Chaithanya, Assistant Professor, Dept. of CSE, CVR College of Engineering
 
 ---
 
@@ -47,44 +41,44 @@ CampusPulse is a multi-tenant SaaS web application that digitizes and streamline
 ## 🖥️ Screenshots
 
 ### Landing Page
-![Landing Page](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/landing%20page.jpg)
+![Landing Page](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/landing%20page.jpg)
 
 ### Login Page
-![Login Page](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/login%20page.jpg)
+![Login Page](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/login%20page.jpg)
 
 ### My Organizations
-![My Organizations](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/myorganizations.jpg)
+![My Organizations](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/myorganizations.jpg)
 
 ### Analytics Dashboard
-![Analytics](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/analytics.jpg)
+![Analytics](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/analytics.jpg)
 
 ### Events Page
-![Events](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/myevents.jpg)
+![Events](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/myevents.jpg)
 
 ### Create New Event
-![Create Event](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/create%20a%20new%20event.jpg)
+![Create Event](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/create%20a%20new%20event.jpg)
 
 ### Razorpay Payment
-![Razorpay](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/razor%20pay.jpg)
+![Razorpay](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/razor%20pay.jpg)
 
 ### Announcements
-![Announcements](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/announcements.jpg)
+![Announcements](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/announcements.jpg)
 
 ### Customize Organization
-![Customize Org](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/customize%20org.jpg)
+![Customize Org](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/customize%20org.jpg)
 
 ---
 
 ## 🗂️ System Design
 
 ### System Architecture
-![System Architecture](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/archi.svg)
+![System Architecture](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/archi.svg)
 
 ### Activity Diagram
-![Activity Diagram](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/acti.svg)
+![Activity Diagram](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/acti.svg)
 
 ### Class Diagram
-![Class Diagram](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/assets/classdiagram.png)
+![Class Diagram](https://raw.githubusercontent.com/Shaik-Faizan-Ahmed/CampusPulse/master/campus-pulse-main/assets/classdiagram.png)
 
 ---
 
@@ -151,7 +145,7 @@ CampusPulse/
 ### Backend Setup
 ```bash
 git clone https://github.com/Shaik-Faizan-Ahmed/CampusPulse.git
-cd CampusPulse
+cd CampusPulse/campus-pulse-main
 npm install
 cp .env.example .env   # Fill in your credentials
 npm start              # Runs at http://localhost:5000
