@@ -1,0 +1,784 @@
+<%- include('./partials/header') %>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+/* Tailwind-like utilities for the 2-column layout */
+.customize-layout {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+@media (min-width: 1024px) {
+  .customize-layout {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+/* Tabs */
+.tabs-list {
+  display: flex;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.tab-btn {
+  flex: 1;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  transition: all 0.2s;
+}
+.tab-btn:hover { background: var(--surface); }
+.tab-btn.active {
+  background: var(--surface);
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+.tab-pane { display: none; }
+.tab-pane.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Cards & Forms */
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.settings-card h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.settings-card p.subtitle {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+
+/* Theme Picker */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.theme-option.selected {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+.theme-preview-circle {
+  width: 38px; height: 38px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.theme-preview-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+}
+
+/* Custom Colors Grid */
+.custom-colors-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--surface2);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+/* Switches */
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .3s; border-radius: 24px; }
+.slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--primary); }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* Events Tab */
+.event-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  background: var(--surface);
+  transition: all 0.2s;
+}
+.event-row.featured {
+  border-color: #eab308; /* Yellow */
+  background: rgba(234, 179, 8, 0.05);
+}
+
+/* Live Preview */
+.live-preview-wrapper {
+  position: sticky;
+  top: 80px;
+}
+.live-preview-box {
+  width: 100%;
+  height: 70vh;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.3s;
+}
+</style>
+
+<div class="customize-layout">
+  
+  <!-- LEFT: Form Controls -->
+  <div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+      <div>
+        <h1 style="font-family:'Syne',sans-serif; font-size:1.5rem; margin-bottom:0.2rem">Customize Org Page</h1>
+        <p style="font-size:0.85rem; color:var(--muted)">Design how visitors see <span style="font-family:monospace;color:var(--primary)">/<%= orgData.slug %></span></p>
+      </div>
+      <div>
+        <button type="button" class="btn btn-primary" onclick="document.getElementById('customizeForm').submit()">
+          <i data-lucide="save" style="width:16px;height:16px;margin-right:6px;vertical-align:bottom;"></i> Save Changes
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs List -->
+    <div class="tabs-list">
+      <button class="tab-btn active" onclick="switchTab('theme')"><i data-lucide="palette" style="width:16px;"></i> Theme</button>
+      <button class="tab-btn" onclick="switchTab('hero')"><i data-lucide="image" style="width:16px;"></i> Hero</button>
+      <button class="tab-btn" onclick="switchTab('about')"><i data-lucide="info" style="width:16px;"></i> About</button>
+      <button class="tab-btn" onclick="switchTab('events')"><i data-lucide="star" style="width:16px;"></i> Events</button>
+      <button class="tab-btn" onclick="switchTab('sponsors')"><i data-lucide="trophy" style="width:16px;"></i> Sponsors</button>
+    </div>
+
+    <form id="customizeForm" action="<%= basePath %>/manage/customize" method="POST">
+      
+      <!-- THEME TAB -->
+      <div id="tab-theme" class="tab-pane active">
+        <div class="settings-card">
+          <h3>Choose a Theme Preset</h3>
+          <p class="subtitle">Select a color scheme that matches your brand.</p>
+          
+          <div class="theme-grid">
+            <% const themes = [
+              { id: 'dark', hex: '#0a0a0f', pri: '#7c5cfc' },
+              { id: 'light', hex: '#f9fafb', pri: '#7c5cfc' },
+              { id: 'blue', hex: '#0a0f1a', pri: '#2563eb' },
+              { id: 'purple', hex: '#0f0a1a', pri: '#7c3aed' },
+              { id: 'teal', hex: '#0a1a1a', pri: '#0d9488' },
+              { id: 'emerald', hex: '#0a1a0f', pri: '#059669' },
+              { id: 'orange', hex: '#1a0f0a', pri: '#ea580c' },
+              { id: 'custom', hex: '#111', pri: '#fff' }
+            ]; %>
+            
+            <% themes.forEach(t => { %>
+              <label class="theme-option <%= (page.theme || 'dark') === t.id ? 'selected' : '' %>" onclick="selectThemeUi('<%= t.id %>')">
+                <input type="radio" name="theme" value="<%= t.id %>" <%= (page.theme || 'dark') === t.id ? 'checked' : '' %> style="display:none" onchange="syncPreview()">
+                <div class="theme-preview-circle" style="background:<%= t.hex %>; border: 2px solid <%= t.pri %>;">
+                  <div class="theme-preview-dot" style="background:<%= t.pri %>"></div>
+                </div>
+                <div style="text-transform:capitalize; font-weight:600; font-size:0.9rem"><%= t.id %></div>
+              </label>
+            <% }) %>
+          </div>
+
+          <!-- Custom Colors (Only shows if 'custom' theme is checked) -->
+          <div id="customColorsBox" class="custom-colors-grid" style="display: <%= page.theme === 'custom' ? 'grid' : 'none' %>;">
+             <div>
+                <label style="font-size:0.8rem; color:var(--muted)">Primary Color</label>
+                <div style="display:flex; gap:0.5rem; align-items:center; margin-top:0.4rem;">
+                    <input type="color" name="customPrimary" value="<%= page.customPrimary || '#6366f1' %>" oninput="syncPreview()">
+                    <input type="text" value="<%= page.customPrimary || '#6366f1' %>" class="form-control" style="flex:1; padding:0.4rem" readonly>
+                </div>
+             </div>
+             <div>
+                <label style="font-size:0.8rem; color:var(--muted)">Accent Color</label>
+                <div style="display:flex; gap:0.5rem; align-items:center; margin-top:0.4rem;">
+                    <input type="color" name="customAccent" value="<%= page.customAccent || '#818cf8' %>" oninput="syncPreview()">
+                    <input type="text" value="<%= page.customAccent || '#818cf8' %>" class="form-control" style="flex:1; padding:0.4rem" readonly>
+                </div>
+             </div>
+             <div>
+                <label style="font-size:0.8rem; color:var(--muted)">Background Color</label>
+                <div style="display:flex; gap:0.5rem; align-items:center; margin-top:0.4rem;">
+                    <input type="color" name="customBg" value="<%= page.customBg || '#0f172a' %>" oninput="syncPreview()">
+                    <input type="text" value="<%= page.customBg || '#0f172a' %>" class="form-control" style="flex:1; padding:0.4rem" readonly>
+                </div>
+             </div>
+             <div>
+                <label style="font-size:0.8rem; color:var(--muted)">Text Color</label>
+                <div style="display:flex; gap:0.5rem; align-items:center; margin-top:0.4rem;">
+                    <input type="color" name="customText" value="<%= page.customText || '#f8fafc' %>" oninput="syncPreview()">
+                    <input type="text" value="<%= page.customText || '#f8fafc' %>" class="form-control" style="flex:1; padding:0.4rem" readonly>
+                </div>
+             </div>
+          </div>
+
+          <!-- Typography -->
+          <div style="margin-top:1.5rem;">
+            <h3>Typography</h3>
+            <p class="subtitle">Choose a font style that represents your identity.</p>
+            <div class="theme-grid">
+              <% const fonts = [
+                { name: 'DM Sans', family: "'DM Sans', sans-serif" },
+                { name: 'Syne', family: "'Syne', sans-serif" },
+                { name: 'Inter', family: "'Inter', sans-serif" },
+                { name: 'Outfit', family: "'Outfit', sans-serif" },
+                { name: 'Montserrat', family: "'Montserrat', sans-serif" },
+                { name: 'Playfair Display', family: "'Playfair Display', serif" }
+              ]; %>
+              <% fonts.forEach(f => { %>
+                <label class="theme-option <%= (page.fontFamily || 'DM Sans') === f.name ? 'selected' : '' %>" onclick="selectFontUi('<%= f.name %>')">
+                  <input type="radio" name="fontFamily" value="<%= f.name %>" <%= (page.fontFamily || 'DM Sans') === f.name ? 'checked' : '' %> style="display:none" onchange="syncPreview()">
+                  <div style="font-family: <%= f.family %>; font-size: 1.1rem; font-weight: 700; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: var(--surface2); border-radius: 8px;">Aa</div>
+                  <div style="font-weight:600; font-size:0.9rem"><%= f.name %></div>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- HERO TAB -->
+      <div id="tab-hero" class="tab-pane">
+        <div class="settings-card">
+          <h3>Hero Settings</h3>
+          <p class="subtitle">Customize the top banner area of your page.</p>
+
+          <div class="form-group">
+            <label>Banner Image URL</label>
+            <input type="url" name="bannerUrl" class="form-control" id="inpBanner" value="<%= page.bannerUrl || '' %>" placeholder="https://example.com/banner.jpg" oninput="syncPreview()">
+            <small style="color:var(--muted)">Full-width background image. Leave blank for gradient.</small>
+          </div>
+          <div class="form-group">
+            <label>Logo URL</label>
+            <input type="url" name="logoUrl" class="form-control" id="inpLogo" value="<%= page.logoUrl || '' %>" placeholder="https://example.com/logo.png" oninput="syncPreview()">
+          </div>
+          <div class="form-group">
+            <label>Tagline</label>
+            <input type="text" name="tagline" class="form-control" id="inpTagline" value="<%= page.tagline || '' %>" placeholder="Your awesome tagline..." oninput="syncPreview()">
+          </div>
+          <div class="form-group">
+            <label>Title/Logo Text Color</label>
+            <div style="display:flex; gap:0.5rem; align-items:center; margin-top:0.4rem;">
+                <input type="color" name="titleColor" id="inpTitleColor" value="<%= page.titleColor || (page.theme === 'light' ? '#000000' : '#ffffff') %>" oninput="syncPreview()">
+                <input type="text" id="valTitleColor" value="<%= page.titleColor || (page.theme === 'light' ? '#000000' : '#ffffff') %>" class="form-control" style="flex:1; padding:0.4rem" readonly>
+            </div>
+            <small style="color:var(--muted)">Overrides the default theme color for your Organization Name.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABOUT TAB -->
+      <div id="tab-about" class="tab-pane">
+        <div class="settings-card" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h3 style="margin:0">Show About Section</h3>
+            <p style="margin:0; font-size:0.8rem; color:var(--muted)">Display organization details</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="inpShowAbout" name="showAbout" <%= page.showAbout ? 'checked' : '' %> onchange="syncPreview()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-card" id="aboutSettings" style="display: <%= page.showAbout ? 'block' : 'none' %>">
+          <div class="form-group">
+            <label>Organized by (Who we are)</label>
+            <input type="text" name="aboutWho" class="form-control" id="inpAboutWho" value="<%= page.aboutWho || '' %>" oninput="syncPreview()">
+          </div>
+          <div class="form-group">
+            <label>About Text</label>
+            <textarea name="aboutText" rows="3" class="form-control" id="inpAboutText" oninput="syncPreview()"><%= page.aboutText || '' %></textarea>
+          </div>
+          <div class="form-group">
+            <label>Highlights (One per line)</label>
+            <textarea name="aboutHighlights" rows="4" class="form-control" id="inpHighlights" oninput="syncPreview()"><%= page.aboutHighlights ? page.aboutHighlights.join('\n') : '' %></textarea>
+          </div>
+        </div>
+
+        <div class="settings-card" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h3 style="margin:0">Show Announcements</h3>
+            <p style="margin:0; font-size:0.8rem; color:var(--muted)">Show recent global announcements</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" name="showAnnouncements" <%= page.showAnnouncements ? 'checked' : '' %>>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- EVENTS TAB -->
+      <div id="tab-events" class="tab-pane">
+        <div class="settings-card">
+          <h3>Featured Events</h3>
+          <p class="subtitle">Highlighted events appear prominent with your custom colors.</p>
+          
+          <% if(events.length === 0) { %>
+            <div style="padding: 2rem; text-align: center; color: var(--muted); background: var(--surface2); border-radius: 8px;">
+               No published events found.
+            </div>
+          <% } else { %>
+            <div id="eventsList">
+              <% events.forEach(ev => { %>
+                <div class="event-row <%= ev.featured ? 'featured' : '' %>" id="evRow-<%= ev._id %>">
+                  <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <i data-lucide="star" style="width:18px; color:<%= ev.featured ? '#eab308' : 'var(--muted)' %>" id="evIcon-<%= ev._id %>"></i>
+                    <div>
+                      <div style="font-weight:600; font-size:0.9rem"><%= ev.title %></div>
+                      <div style="font-size:0.75rem; color:var(--muted)"><%= ev.category %></div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size:0.75rem" onclick="toggleFeatured('<%= ev._id %>')">
+                    <%= ev.featured ? 'Remove Featured' : 'Set Featured' %>
+                  </button>
+                </div>
+              <% }) %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- SPONSORS TAB -->
+      <div id="tab-sponsors" class="tab-pane">
+        <div class="settings-card" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h3 style="margin:0">Sponsors Section</h3>
+            <p style="margin:0; font-size:0.8rem; color:var(--muted)">Show sponsor logos on the page</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="inpShowSponsors" name="showSponsors" <%= page.showSponsors ? 'checked' : '' %> onchange="syncPreview()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="settings-card" id="sponsorsSettings" style="display: <%= page.showSponsors ? 'block' : 'none' %>">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+             <h3 style="margin:0">Add Sponsors</h3>
+             <button type="button" class="btn btn-outline" style="padding:0.3rem 0.6rem; font-size:0.8rem" onclick="addSponsorRow()">+ Add</button>
+          </div>
+          
+          <div id="sponsorList" style="display:flex; flex-direction:column; gap:1rem;">
+            <% if(page.sponsors && page.sponsors.length) { %>
+              <% page.sponsors.forEach((s, idx) => { %>
+                <div class="sponsor-input-row" style="background:var(--surface2); padding:1rem; border-radius:8px; border:1px solid var(--border); position:relative;">
+                  <button type="button" onclick="this.parentElement.remove(); syncPreview();" style="position:absolute; top:8px; right:8px; background:transparent; border:none; color:var(--red); cursor:pointer;"><i data-lucide="trash-2" style="width:16px;"></i></button>
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:0.5rem;">
+                    <input type="text" name="sponsorNames" value="<%= s.name %>" placeholder="Sponsor Name" class="form-control" oninput="syncPreview()">
+                    <input type="url" name="sponsorLinks" value="<%= s.link %>" placeholder="Website" class="form-control">
+                  </div>
+                  <input type="url" name="sponsorLogos" value="<%= s.logoUrl %>" placeholder="Logo image URL" class="form-control" oninput="syncPreview()">
+                </div>
+              <% }) %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- RIGHT: Live Preview (Sticky) -->
+  <div class="live-preview-wrapper" style="pointer-events:none; user-select:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+      <span style="font-size:0.7rem; text-transform:uppercase; font-weight:700; color:var(--muted); letter-spacing:1px;">Live Preview</span>
+      <span style="font-size:0.7rem; background:#05966915; color:#059669; padding:0.2rem 0.5rem; border-radius:4px; font-weight:600;">Auto-updates</span>
+    </div>
+    
+    <div class="live-preview-box" id="previewBox" style="pointer-events:auto;">
+      <!-- Preview Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem; border-bottom:1px solid currentColor;" id="prevHeaderBorder">
+        <div style="display:flex; align-items:center; gap:0.5rem">
+          <div id="prevLogoFallback" style="width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:0.7rem; font-family:'Syne',sans-serif;"><%= (orgData.name || 'O')[0].toUpperCase() %></div>
+          <img id="prevLogoImg" src="" style="width:24px; height:24px; border-radius:6px; object-fit:cover; display:none;">
+          <span style="font-weight:600; font-size:0.8rem; font-family:'Syne', sans-serif;"><%= orgData.name %></span>
+        </div>
+        <div style="font-size:0.75rem" id="prevLoginBtn">Login</div>
+      </div>
+
+      <!-- Preview Hero -->
+      <div id="prevHero" style="text-align:center; padding: 3rem 1rem; position:relative; min-height: 180px; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden;">
+        <div id="prevHeroGradient" style="position:absolute; inset:0; z-index:0;"></div>
+        <div style="position:relative; z-index:1;">
+          <h2 style="font-family:'Syne',sans-serif; font-size:1.5rem; margin-bottom:0.5rem"><%= orgData.name %></h2>
+          <p id="prevTagline" style="font-size:0.8rem; opacity:0.8"></p>
+          <div id="prevExploreBtn" style="display:inline-block; margin-top:1rem; padding:0.4rem 1rem; border-radius:99px; font-size:0.75rem; font-weight:bold;">Explore Events</div>
+        </div>
+      </div>
+
+      <!-- Preview Content Area -->
+      <div style="padding: 1rem;">
+        
+        <!-- About Section Preview -->
+        <div id="prevAboutSec" style="margin-bottom: 1.5rem;">
+           <div style="font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:bold; margin-bottom:0.5rem;" id="prevAboutTitleText">About</div>
+           <div id="prevAboutWho" style="font-size:0.9rem; font-weight:600; margin-bottom:0.25rem;"></div>
+           <div id="prevAboutDesc" style="font-size:0.75rem; opacity:0.8; line-height:1.4;"></div>
+           <div id="prevHighlights" style="display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:0.75rem;"></div>
+        </div>
+
+        <!-- Fake Events Preview -->
+        <div style="margin-bottom: 1.5rem;">
+           <div style="font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:bold; margin-bottom:0.5rem;">Events</div>
+           <div id="prevFeaturedEvent" style="padding:1rem; border-radius:8px; margin-bottom:0.5rem;">
+             <div style="font-size:0.7rem; font-weight:bold; margin-bottom:0.25rem; display:flex; align-items:center; gap:4px;"><i data-lucide="star" style="width:10px;"></i> Featured Event</div>
+             <div style="font-weight:bold; font-size:0.9rem;">Sample Event</div>
+           </div>
+           <div id="prevNormalEvent" style="padding:1rem; border-radius:8px; border:1px solid currentColor;">
+             <span id="prevEventBadge" style="font-size:0.6rem; padding:2px 6px; border-radius:4px; font-weight:bold;">Category</span>
+             <div style="font-weight:bold; font-size:0.9rem; margin-top:0.35rem;">Regular Event Card</div>
+           </div>
+        </div>
+
+        <!-- Sponsors Preview -->
+        <div id="prevSponsorSec">
+           <div style="font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:bold; margin-bottom:0.5rem;">Sponsors</div>
+           <div id="prevSponsorList" style="display:flex; gap:0.5rem; flex-wrap:wrap;"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+lucide.createIcons();
+
+// --- TABS LOGIC ---
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  
+  event.currentTarget.classList.add('active');
+  document.getElementById(`tab-${tabId}`).classList.add('active');
+}
+
+// --- AJAX EVENT FEATURED TOGGLE ---
+async function toggleFeatured(eventId) {
+    try {
+        const res = await fetch(`<%= basePath %>/manage/events/${eventId}/featured`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+            const row = document.getElementById(`evRow-${eventId}`);
+            const icon = document.getElementById(`evIcon-${eventId}`);
+            const btn = row.querySelector('button');
+            
+            if (data.featured) {
+                row.classList.add('featured');
+                icon.style.color = '#eab308';
+                btn.innerText = 'Remove Featured';
+            } else {
+                row.classList.remove('featured');
+                icon.style.color = 'var(--muted)';
+                btn.innerText = 'Set Featured';
+            }
+        } else {
+            alert(data.message || 'Error toggling event');
+        }
+    } catch(err) {
+        alert("Failed to toggle event");
+        console.error(err);
+    }
+}
+
+// --- SPONSORS UI ---
+function addSponsorRow() {
+    const list = document.getElementById('sponsorList');
+    const div = document.createElement('div');
+    div.className = 'sponsor-input-row';
+    div.style.cssText = 'background:var(--surface2); padding:1rem; border-radius:8px; border:1px solid var(--border); position:relative;';
+    div.innerHTML = `
+        <button type="button" onclick="this.parentElement.remove(); syncPreview();" style="position:absolute; top:8px; right:8px; background:transparent; border:none; color:var(--red); cursor:pointer;"><i data-lucide="trash-2" style="width:16px;"></i></button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:0.5rem;">
+          <input type="text" name="sponsorNames" placeholder="Sponsor Name" class="form-control" oninput="syncPreview()">
+          <input type="url" name="sponsorLinks" placeholder="Website" class="form-control">
+        </div>
+        <input type="url" name="sponsorLogos" placeholder="Logo image URL" class="form-control" oninput="syncPreview()">
+    `;
+    list.appendChild(div);
+    lucide.createIcons();
+    syncPreview();
+}
+
+// --- THEME SELECTOR ---
+const presets = {
+    dark:    { p: "#7c5cfc", bg: "#0a0a0f", t: "#e8e8f0", b: "#1e1e2e", s: "#13131a" },
+    light:   { p: "#7c5cfc", bg: "#f9fafb", t: "#1a1a2e", b: "#e5e7eb", s: "#ffffff" },
+    blue:    { p: "#2563eb", bg: "#0a0f1a", t: "#e8ecf0", b: "#1e293b", s: "#111827" },
+    purple:  { p: "#7c3aed", bg: "#0f0a1a", t: "#ede9fe", b: "#2e1a4a", s: "#1a1025" },
+    teal:    { p: "#0d9488", bg: "#0a1a1a", t: "#e8f0f0", b: "#1a3a3a", s: "#0f2525" },
+    emerald: { p: "#059669", bg: "#0a1a0f", t: "#e8f0ec", b: "#1a3a25", s: "#0f2518" },
+    orange:  { p: "#ea580c", bg: "#1a0f0a", t: "#f0ece8", b: "#3a2a1a", s: "#251a0f" },
+    custom:  { }
+};
+
+function selectThemeUi(tid) {
+  // Unselect others
+  document.querySelectorAll('#tab-theme .theme-option').forEach(el => {
+    if (el.querySelector('input[name="theme"]')) el.classList.remove('selected');
+  });
+  
+  // Select this one
+  const label = event.currentTarget;
+  label.classList.add('selected');
+  const radio = label.querySelector('input[name="theme"]');
+  if (radio) {
+      radio.checked = true;
+      syncPreview();
+  }
+  
+  if (tid === 'custom') {
+      document.getElementById('customColorsBox').style.display = 'grid';
+  } else {
+      document.getElementById('customColorsBox').style.display = 'none';
+  }
+}
+
+function selectFontUi(fontName) {
+  // Unselect others
+  document.querySelectorAll('#tab-theme .theme-option').forEach(el => {
+    if (el.querySelector('input[name="fontFamily"]')) el.classList.remove('selected');
+  });
+  
+  // Select this one
+  const label = event.currentTarget;
+  label.classList.add('selected');
+  const radio = label.querySelector('input[name="fontFamily"]');
+  if (radio) {
+      radio.checked = true;
+      syncPreview();
+  }
+}
+
+// --- LIVE PREVIEW SYNC ---
+function syncPreview() {
+    // 1. Calculate current theme values
+    const selectedThemeInput = document.querySelector('input[name="theme"]:checked');
+    const tid = selectedThemeInput ? selectedThemeInput.value : 'dark';
+    
+    // Calculate Font
+    const selectedFontInput = document.querySelector('input[name="fontFamily"]:checked');
+    const fontName = selectedFontInput ? selectedFontInput.value : 'DM Sans';
+    const fontMapping = {
+      'DM Sans': "'DM Sans', sans-serif",
+      'Syne': "'Syne', sans-serif",
+      'Inter': "'Inter', sans-serif",
+      'Outfit': "'Outfit', sans-serif",
+      'Montserrat': "'Montserrat', sans-serif",
+      'Playfair Display': "'Playfair Display', serif"
+    };
+    
+    // Load font if needed (Google Fonts)
+    const fontId = 'google-font-' + fontName.replace(/\s+/g, '-').toLowerCase();
+    if (!document.getElementById(fontId)) {
+        const link = document.createElement('link');
+        link.id = fontId;
+        link.rel = 'stylesheet';
+        link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/\s+/g, '+')}:wght@400;600;700;800&display=swap`;
+        document.head.appendChild(link);
+    }
+    
+    let state = {};
+    if (tid === 'custom') {
+        const cPri = document.querySelector('input[name="customPrimary"]').value;
+        const cBg = document.querySelector('input[name="customBg"]').value;
+        const cText = document.querySelector('input[name="customText"]').value;
+        state = { p: cPri, bg: cBg, t: cText, b: cText+'22', s: cText+'0d' }; // estimate borders
+        // update the text inputs visually
+        document.querySelectorAll('input[type="color"]').forEach(inp => {
+           inp.nextElementSibling.value = inp.value;
+        });
+    } else {
+        state = presets[tid];
+    }
+    
+    // 2. Apply theme colors & Font to Preview Box
+    const pBox = document.getElementById('previewBox');
+    pBox.style.backgroundColor = state.bg;
+    pBox.style.color = state.t;
+    pBox.style.fontFamily = fontMapping[fontName];
+    document.getElementById('prevHeaderBorder').style.borderColor = state.b;
+    
+    // Header Logo/Colors
+    const logoUrl = document.getElementById('inpLogo').value.trim();
+    const titleColor = document.getElementById('inpTitleColor').value;
+    
+    // Update hex text display
+    document.getElementById('valTitleColor').value = titleColor;
+    
+    if (logoUrl) {
+        document.getElementById('prevLogoImg').src = logoUrl;
+        document.getElementById('prevLogoImg').style.display = 'block';
+        document.getElementById('prevLogoFallback').style.display = 'none';
+    } else {
+        document.getElementById('prevLogoImg').style.display = 'none';
+        document.getElementById('prevLogoFallback').style.display = 'flex';
+        document.getElementById('prevLogoFallback').style.backgroundColor = state.p + '25';
+        document.getElementById('prevLogoFallback').style.color = titleColor || state.p;
+    }
+    document.getElementById('prevLogoText').style.color = titleColor || state.t;
+    document.getElementById('prevLoginBtn').style.color = state.t;
+    document.getElementById('prevLoginBtn').style.opacity = '0.7';
+    
+    // Hero Section
+    const bannerUrl = document.getElementById('inpBanner').value.trim();
+    const heroEl = document.getElementById('prevHero');
+    const heroGrad = document.getElementById('prevHeroGradient');
+    
+    if (bannerUrl) {
+        heroEl.style.background = `url('${bannerUrl}') center/cover`;
+        heroGrad.style.background = `rgba(0,0,0,0.6)`;
+        heroEl.style.color = `#fff`;
+    } else {
+        heroEl.style.background = 'transparent';
+        heroGrad.style.background = `radial-gradient(ellipse at top, ${state.p}30, transparent 70%)`;
+        heroEl.style.color = state.t;
+        heroEl.style.borderBottom = `1px solid ${state.b}`;
+    }
+    
+    document.getElementById('prevTagline').innerText = document.getElementById('inpTagline').value || "Your tagline here...";
+    document.getElementById('prevHeroTitle').style.color = titleColor || (bannerUrl ? '#fff' : state.t);
+    const expBtn = document.getElementById('prevExploreBtn');
+    expBtn.style.backgroundColor = state.p;
+    expBtn.style.color = '#fff';
+
+    // About Tab Togglers
+    const showAbout = document.getElementById('inpShowAbout').checked;
+    document.getElementById('aboutSettings').style.display = showAbout ? 'block' : 'none';
+    
+    if (showAbout) {
+        document.getElementById('prevAboutSec').style.display = 'block';
+        document.getElementById('prevAboutTitleText').innerHTML = `About <span style="color:${state.p}">Us</span>`;
+        document.getElementById('prevAboutWho').innerText = document.getElementById('inpAboutWho').value;
+        document.getElementById('prevAboutDesc').innerText = document.getElementById('inpAboutText').value;
+        
+        const highlightsText = document.getElementById('inpHighlights').value;
+        const hlArr = highlightsText.split('\n').filter(x => x.trim().length > 0);
+        const hlContainer = document.getElementById('prevHighlights');
+        hlContainer.innerHTML = '';
+        hlArr.forEach(h => {
+            const span = document.createElement('div');
+            span.style.cssText = `background:${state.p}15; color:${state.p}; padding:2px 8px; border-radius:99px; font-size:0.65rem; font-weight:600; border:1px solid ${state.p}30;`;
+            span.innerText = "✨ " + h;
+            hlContainer.appendChild(span);
+        });
+    } else {
+        document.getElementById('prevAboutSec').style.display = 'none';
+    }
+
+    // Tweak Events preview cards
+    const fEvent = document.getElementById('prevFeaturedEvent');
+    fEvent.style.backgroundColor = state.p;
+    fEvent.style.color = '#fff';
+    fEvent.querySelector('i').style.color = '#fff';
+    // fake fill is handled by Lucide if needed, we just change color
+    
+    const nEvent = document.getElementById('prevNormalEvent');
+    nEvent.style.backgroundColor = state.s;
+    nEvent.style.borderColor = state.b;
+    document.getElementById('prevEventBadge').style.backgroundColor = state.p + '20';
+    document.getElementById('prevEventBadge').style.color = state.p;
+
+    // Sponsors Toggle
+    const showSponsors = document.getElementById('inpShowSponsors').checked;
+    document.getElementById('sponsorsSettings').style.display = showSponsors ? 'block' : 'none';
+    
+    if (showSponsors) {
+        document.getElementById('prevSponsorSec').style.display = 'block';
+        document.getElementById('prevSponsorSec').querySelector('div').innerHTML = `Our <span style="color:${state.p}">Sponsors</span>`;
+        
+        const spNames = document.querySelectorAll('input[name="sponsorNames"]');
+        const spLogos = document.querySelectorAll('input[name="sponsorLogos"]');
+        const spList = document.getElementById('prevSponsorList');
+        spList.innerHTML = '';
+        
+        spNames.forEach((inp, idx) => {
+            const v = inp.value.trim();
+            const l = spLogos[idx].value.trim();
+            if (v || l) {
+                const b = document.createElement('div');
+                b.style.cssText = `width: 60px; height: 36px; border:1px solid ${state.b}; background:${state.s}; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden; font-size:0.5rem; font-weight:bold; padding:4px; opacity:0.8;`;
+                if (l) {
+                    b.innerHTML = `<img src="${l}" style="max-width:100%; max-height:100%; object-fit:contain; filter:grayscale(100%);">`;
+                } else {
+                    b.innerText = v;
+                }
+                spList.appendChild(b);
+            }
+        });
+    } else {
+        document.getElementById('prevSponsorSec').style.display = 'none';
+    }
+}
+
+document.getElementById('inpShowAbout').addEventListener('change', syncPreview);
+document.getElementById('inpShowSponsors').addEventListener('change', syncPreview);
+
+window.addEventListener('DOMContentLoaded', () => {
+    // Force sync preview on load to ensure UI matches database state
+    const currentTid = document.querySelector('input[name="theme"]:checked')?.value;
+    const currentFont = document.querySelector('input[name="fontFamily"]:checked')?.value;
+    
+    if (currentTid) {
+      const activeThemeBtn = document.querySelector(`input[name="theme"][value="${currentTid}"]`)?.closest('.theme-option');
+      if (activeThemeBtn) activeThemeBtn.classList.add('selected');
+      if (currentTid === 'custom') document.getElementById('customColorsBox').style.display = 'grid';
+    }
+    
+    if (currentFont) {
+      const activeFontBtn = document.querySelector(`input[name="fontFamily"][value="${currentFont}"]`)?.closest('.theme-option');
+      if (activeFontBtn) activeFontBtn.classList.add('selected');
+    }
+
+    // Ensure hex text values match color pickers
+    document.querySelectorAll('input[type="color"]').forEach(inp => {
+       const textInp = inp.nextElementSibling;
+       if (textInp && textInp.type === 'text') textInp.value = inp.value;
+    });
+
+    syncPreview();
+});
+</script>
+
+<%- include('./partials/footer') %>

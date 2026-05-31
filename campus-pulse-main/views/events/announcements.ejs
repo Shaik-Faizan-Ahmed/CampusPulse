@@ -1,0 +1,106 @@
+<%- include('../partials/header') %>
+
+<div class="announcements-container" style="max-width:800px;margin:0 auto;padding:0 1.5rem 3rem">
+  <div class="page-header" style="text-align:left;padding:2rem 0 1.5rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+      <div>
+        <h1 style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800">📢 <span>Announcements</span></h1>
+        <p style="color:var(--muted);font-size:0.9rem;margin-top:0.4rem">
+          <%= canCreate ? 'Post and manage announcements' : 'Stay updated with the latest news' %>
+        </p>
+      </div>
+      <div style="display:flex;gap:0.5rem">
+        <a href="<%= basePath %>/events" class="btn btn-outline btn-sm">← Events</a>
+        <% if (canCreate) { %>
+          <button onclick="document.getElementById('create-modal').style.display='flex'" class="btn btn-primary btn-sm">+ Post Announcement</button>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <% if (announcements.length === 0) { %>
+    <div style="text-align:center;padding:5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)">
+      <div style="font-size:3rem;margin-bottom:1rem">📢</div>
+      <h3 style="font-family:'Syne',sans-serif;color:var(--muted);margin-bottom:0.5rem">No announcements yet</h3>
+      <p style="font-size:0.85rem;color:var(--muted)">
+        <% if (canCreate) { %>Click the button above to post the first announcement<% } else { %>Check back later for updates<% } %>
+      </p>
+    </div>
+  <% } else { %>
+    <div style="display:flex;flex-direction:column;gap:0.85rem">
+      <% announcements.forEach(ann => { %>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;transition:border-color 0.2s"
+             onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border)'">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:0.5rem">
+            <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem"><%= ann.title %></h3>
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0">
+              <% if (ann.targetType === 'ALL') { %>
+                <span class="badge" style="background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.25)">👥 All Members</span>
+              <% } else { %>
+                <span class="badge" style="background:rgba(59,130,246,0.12);color:var(--blue);border:1px solid rgba(59,130,246,0.25)">📅 <%= ann.eventId ? ann.eventId.title : 'Event' %></span>
+              <% } %>
+            </div>
+          </div>
+          <p style="font-size:0.88rem;color:var(--muted);line-height:1.6;margin-bottom:0.75rem"><%= ann.message %></p>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:0.75rem;color:var(--muted)">
+              🕐 <%= new Date(ann.createdAt).toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'short'}) %>
+              <% if (ann.createdBy) { %> · by <%= ann.createdBy.name %><% } %>
+            </span>
+            <% if (canCreate) { %>
+              <form action="<%= basePath %>/announcements/<%= ann._id %>?_method=DELETE" method="POST" style="margin:0"
+                    onsubmit="return confirm('Delete this announcement?')">
+                <button type="submit" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:0.78rem;padding:0.25rem 0.5rem;border-radius:6px;transition:background 0.2s"
+                        onmouseenter="this.style.background='rgba(239,68,68,0.1)'" onmouseleave="this.style.background='none'">🗑️ Delete</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<!-- Create Announcement Modal -->
+<% if (canCreate) { %>
+<div id="create-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem"
+     onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;width:min(500px,100%);max-height:90vh;overflow-y:auto">
+    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:0.3rem">📢 Post Announcement</h2>
+    <p style="color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem">Notify members with an update</p>
+
+    <form action="<%= basePath %>/announcements" method="POST">
+      <div class="form-group">
+        <label>Title *</label>
+        <input type="text" name="title" placeholder="e.g. Important Update" required>
+      </div>
+      <div class="form-group">
+        <label>Message *</label>
+        <textarea name="message" placeholder="Write your announcement here..." required style="min-height:100px"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Target Audience</label>
+        <select name="targetType" id="targetSelect" onchange="document.getElementById('eventGroup').style.display=this.value==='EVENT'?'block':'none'">
+          <option value="ALL">All Members</option>
+          <option value="EVENT">Specific Event</option>
+        </select>
+      </div>
+      <div class="form-group" id="eventGroup" style="display:none">
+        <label>Select Event</label>
+        <select name="eventId">
+          <option value="">Select an event...</option>
+          <% events.forEach(ev => { %>
+            <option value="<%= ev._id %>"><%= ev.title %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:1.5rem">
+        <button type="submit" class="btn btn-primary" style="flex:1">Post Announcement</button>
+        <button type="button" class="btn btn-outline" onclick="document.getElementById('create-modal').style.display='none'" style="width:auto">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+<% } %>
+
+<%- include('../partials/footer') %>

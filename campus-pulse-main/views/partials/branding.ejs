@@ -1,0 +1,58 @@
+<% 
+  const p = (typeof org !== 'undefined' && org && org.orgPage) ? org.orgPage : {};
+  const currentFont = p.fontFamily || 'DM Sans';
+  const titleColor = p.titleColor || '';
+  const fontsToLoad = ['DM Sans', 'Syne', currentFont];
+  const uniqueFonts = [...new Set(fontsToLoad)];
+%>
+<link href="https://fonts.googleapis.com/css2?family=<%= uniqueFonts.map(f => f.replace(/\s+/g, '+') + ':wght@400;600;700;800').join('&family=') %>&display=swap" rel="stylesheet">
+
+<% 
+  const currentTheme = (typeof theme !== 'undefined') ? theme : (typeof orgTheme !== 'undefined' ? orgTheme : null);
+%>
+
+<% if (currentTheme) { %>
+<style>
+  :root, html[data-theme="light"], html[data-theme="dark"] {
+    --primary: <%= currentTheme.primary %>;
+    --accent: <%= currentTheme.accent %>;
+    --accent-glow: color-mix(in srgb, <%= currentTheme.accent %> 20%, transparent);
+    --bg: <%= currentTheme.bg %>;
+    --text: <%= currentTheme.text %>;
+    --surface: <%= currentTheme.surface %>;
+    --border: <%= currentTheme.border %>;
+    --muted: <%= currentTheme.muted %>;
+    --radius: 16px;
+    --font-main: '<%= currentFont %>', sans-serif;
+    --font-heading: '<%= currentFont %>', sans-serif;
+    --title-color: <%= titleColor || (currentTheme.dark ? '#fff' : currentTheme.text) %>;
+  }
+  
+  /* Global branding overrides for organization space */
+  body, .navbar, .logo, .btn, h1, h2, h3, h4, .section-title, .card-title, .badge {
+    font-family: var(--font-main) !important;
+  }
+
+  .logo, .pub-logo {
+    color: var(--title-color) !important;
+  }
+
+  /* Ensure primary elements use the theme primary */
+  .btn-primary {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #fff !important;
+  }
+  
+  .badge-cat, .badge-primary {
+    background: color-mix(in srgb, var(--primary) 15%, transparent) !important;
+    color: var(--primary) !important;
+  }
+
+  /* Accessibility improvement for dark themes */
+  <% if (currentTheme.dark) { %>
+    .navbar { background: rgba(10, 10, 15, 0.8) !important; }
+    .card { background: var(--surface) !important; }
+  <% } %>
+</style>
+<% } %>
